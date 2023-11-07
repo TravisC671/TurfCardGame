@@ -1,0 +1,30 @@
+.main {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  width: 200px;
+  height: 275px;
+  background-color: rgb(9, 13, 23);
+  border-radius: 5px;
+}
+
+.cardWrapper {
+  display: grid;
+  grid-template-columns: repeat(2,200px);
+  grid-template-rows: repeat(2,275px);
+  grid-gap:30px 30px;
+  background-color: rgb(16, 20, 32);
+  padding: 20px;
+  border-radius: 10px;
+
+}
+
+.mapCanvas {
+  height: 1000px;
+  width: 500px;
+} 

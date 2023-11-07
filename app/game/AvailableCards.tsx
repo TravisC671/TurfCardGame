@@ -7,8 +7,6 @@ export default function AvailableCards() {
         <Card />
         <Card />
         <Card />
-        <Card />
-        <Card />
     </div>
   )
 }
