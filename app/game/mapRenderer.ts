@@ -61,6 +61,10 @@ class mapRenderer {
 			}
 			this.mapArray.push(row);
 		}
+		this.mapArray[4][4] = 3
+		this.mapArray[20][4] = 5
+
+		console.log(JSON.stringify(this.mapArray))
 	}
 
 	drawGrid() {

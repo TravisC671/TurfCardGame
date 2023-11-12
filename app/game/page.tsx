@@ -3,6 +3,8 @@ import AvailableCards from "./AvailableCards";
 import Map from "./Map";
 
 export default function mapEditor() {
+	
+
 	return (
 		<main className={styles.main}>
 			<AvailableCards />
