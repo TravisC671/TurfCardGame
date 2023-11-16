@@ -60,7 +60,7 @@ export default function Map(props) {
 					renderer.changeRotation(-1);
 					break;
 				case " ":
-					console.log('space');
+					console.log('placeItem');
 					break;
 			}
 		}

@@ -29,6 +29,7 @@ class mapRenderer {
 	placementX: number;
 	placementY: number;
 	isPlacementValid: boolean;
+	validMovements: number[];
 	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		this.ctx = ctx;
 		this.canvas = canvas;
@@ -69,6 +70,9 @@ class mapRenderer {
 		this.placementY = 17;
 
 		this.selectedCardRotationUncapped = 0;
+
+		//top right bottom left
+		this.validMovements = [1, 1, 1, 1];
 	}
 
 	initializeMap(value: number) {
@@ -80,7 +84,9 @@ class mapRenderer {
 			this.mapArray.push(row);
 		}
 		this.mapArray[4][4] = 3;
+		this.mapArray[3][3] = 0;
 		this.mapArray[20][4] = 5;
+		console.log(this.mapArray);
 	}
 
 	rotateArray(arr, isClockwise) {
@@ -105,20 +111,16 @@ class mapRenderer {
 	isNeighboringCell(y: number, x: number) {
 		//returns true if next to a neighbor
 		//returns false if no neigbors or is on top of a neigbor
-		if (this.mapArray[y][x] == 5 || this.mapArray[y][x] == 6) {
-			return false;
-		}
+		if (this.mapArray[y][x] == 5 || this.mapArray[y][x] == 6) return false;
 
 		let isNeigboringCell = false;
 
 		for (let i = -1; i <= 1; i++) {
 			for (let j = -1; j <= 1; j++) {
-				if (i + y < 0 || i + y >= this.mapHeight) {
-					continue;
-				}
-				if (j == x && i == y) {
-					continue;
-				}
+				if (i + y < 0 || i + y >= this.mapHeight) continue;
+				if (j + x < 0 || j + x >= this.mapWidth) continue;
+				if (j == x && i == y) continue;
+
 				if (
 					this.mapArray[i + y][j + x] == 5 ||
 					this.mapArray[i + y][j + x] == 6
@@ -141,16 +143,10 @@ class mapRenderer {
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray.length; j++) {
-				if (i + yOffset < 0 || i + yOffset > this.mapHeight) {
-					continue;
-				}
-				if (j + xOffset < 0 || j + xOffset > this.mapWidth) {
-					continue;
-				}
+				if (i + yOffset < 0 || i + yOffset > this.mapHeight) continue;
+				if (j + xOffset < 0 || j + xOffset > this.mapWidth) continue;
 
-				if (this.selectedCardArray[i][j] == 0) {
-					continue;
-				}
+				if (this.selectedCardArray[i][j] == 0) continue;
 
 				if (
 					this.mapArray[i + yOffset][j + xOffset] != 1 &&
@@ -166,28 +162,87 @@ class mapRenderer {
 			}
 		}
 
-		console.log(
-			`isOverlapping: ${isOverlapping}, isPositionValid: ${isPositionValid}`,
-		);
 		return !isOverlapping && isPositionValid ? true : false;
+	}
+
+	isNextToWall(y: number, x: number) {
+		for (let i = -1; i <= 1; i++) {
+			for (let j = -1; j <= 1; j++) {
+				//this seems a bit redundant but idk another way to do it
+
+				let isOutOfBounds = false;
+				if (i + y < 0) {
+					console.log("next to top wall");
+					this.validMovements[0] = 0;
+					isOutOfBounds = true;
+				} // else this.validMovements[0] = 1;
+
+				if (i + y >= this.mapHeight) {
+					console.log("next to bottom wall");
+					this.validMovements[2] = 0;
+					isOutOfBounds = true;
+				} //else this.validMovements[2] = 1;
+
+				if (j + x < 0) {
+					console.log("next to right wall");
+					this.validMovements[3] = 0;
+					isOutOfBounds = true;
+				} //else this.validMovements[3] = 1;
+
+				if (j + x >= this.mapWidth) {
+					console.log("next to left wall");
+					this.validMovements[1] = 0;
+					isOutOfBounds = true;
+				} //else this.validMovements[1] = 1;
+
+				if ((j == x && i == y) || isOutOfBounds) {
+					continue;
+				}
+
+				let cellValue = this.mapArray[i + y][j + x];
+
+				if (cellValue != 0) continue;
+				//console.log(cellValue)
+
+				//since cellvalue == 0 we dont need to check it, and since valid movement is reset in the previous spot we dont need to change it
+				console.log("cellVallue", cellValue);
+				if (i == -1 && j == 0) this.validMovements[0] = 0;
+				if (i == 0 && j == 1) this.validMovements[1] = 0;
+				if (i == 1 && j == 0) this.validMovements[2] = 0;
+				if (i == 0 && j == -1) this.validMovements[3] = 0;
+			}
+		}
+	}
+
+	checkMovementDirections() {
+		this.validMovements = [1, 1, 1, 1];
+
+		for (let i = 0; i < this.selectedCardArray.length; i++) {
+			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
+				if (this.selectedCardArray[i][j] != 0) {
+					this.isNextToWall(i + this.placementY, j + this.placementX);
+				}
+			}
+		}
 	}
 
 	drawGrid() {
 		for (let i = 0; i < this.mapHeight; i++) {
 			for (let j = 0; j < this.mapWidth; j++) {
-				if (this.mapArray[i][j] != 0) {
-					this.ctx.fillStyle = this.colors.border;
-					this.ctx.fillRect(
-						j * (this.cellSize + this.padding) +
-							this.shiftOffsetX -
-							this.padding,
-						i * (this.cellSize + this.padding) +
-							this.shiftOffsetY -
-							this.padding,
-						this.cellSize + this.padding * 2,
-						this.cellSize + this.padding * 2,
-					);
-				}
+				if (this.mapArray[i][j] == 0) continue;
+
+				this.ctx.fillStyle = this.colors.border;
+				this.ctx.fillRect(
+					j * (this.cellSize + this.padding) +
+						this.shiftOffsetX -
+						this.padding,
+					i * (this.cellSize + this.padding) +
+						this.shiftOffsetY -
+						this.padding,
+					this.cellSize + this.padding * 2,
+					this.cellSize + this.padding * 2,
+				);
+
 				switch (this.mapArray[i][j]) {
 					case 1:
 						this.ctx.fillStyle = this.colors.empty;
@@ -224,7 +279,7 @@ class mapRenderer {
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
-				this.ctx.globalAlpha = (this.isPlacementValid) ? 1 : 0.4;
+				this.ctx.globalAlpha = this.isPlacementValid ? 1 : 0.4;
 				switch (this.selectedCardArray[i][j]) {
 					case 1:
 						this.ctx.fillStyle = this.colors.fillColorB;
@@ -250,6 +305,7 @@ class mapRenderer {
 	}
 
 	setSelectedCard(cardID) {
+		//TODO check if the new card is outside of the array and correct it
 		if (cardID != -1) {
 			this.selectedCard = cardID;
 			const cardData = cards.cards[this.selectedCard];
@@ -259,13 +315,38 @@ class mapRenderer {
 	}
 
 	changePosX(x) {
-		this.placementX += x;
-		this.isPlacementValid = this.isValidPlacement(this.placementY, this.placementX);
+		if (this.selectedCard != -1) {
+			this.checkMovementDirections();
+			if (x == 1) {
+				this.placementX += this.validMovements[1];
+			}
+			if (x == -1) {
+				this.placementX -= this.validMovements[3];
+			}
+		}
+
+		this.isPlacementValid = this.isValidPlacement(
+			this.placementY,
+			this.placementX,
+		);
 	}
 
 	changePosY(y) {
-		this.placementY += y;
-		this.isPlacementValid = this.isValidPlacement(this.placementY, this.placementX);
+		if (this.selectedCard != -1) {
+			this.checkMovementDirections();
+			console.log(this.validMovements);
+			if (y == 1) {
+				this.placementY += this.validMovements[2];
+			}
+			if (y == -1) {
+				this.placementY -= this.validMovements[0];
+			}
+		}
+
+		this.isPlacementValid = this.isValidPlacement(
+			this.placementY,
+			this.placementX,
+		);
 	}
 
 	changeRotation(r) {
@@ -281,16 +362,15 @@ class mapRenderer {
 				true,
 			);
 		}
-		this.isPlacementValid = this.isValidPlacement(this.placementY, this.placementX);
+		this.isPlacementValid = this.isValidPlacement(
+			this.placementY,
+			this.placementX,
+		);
 	}
 
 	render() {
-		/*
 		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 		this.ctx.fillStyle = "#f25b50";
-		this.ctx.beginPath();
-		this.ctx.arc(50, 100, 100, 0, 2 * Math.PI);
-		this.ctx.fill();*/
 		this.drawGrid();
 		this.drawHover();
 	}
