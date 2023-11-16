@@ -61,6 +61,7 @@ export default function Map(props) {
 					break;
 				case " ":
 					console.log('placeItem');
+					renderer.placeCard(props.sendCardPlacement())
 					break;
 			}
 		}
@@ -93,7 +94,6 @@ export default function Map(props) {
 		<canvas
 			className={styles.mapCanvas}
 			ref={canvasRef}
-			{...props}
 		></canvas>
 	);
 }

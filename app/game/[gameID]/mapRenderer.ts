@@ -30,6 +30,7 @@ class mapRenderer {
 	placementY: number;
 	isPlacementValid: boolean;
 	validMovements: number[];
+	cardRotation: number;
 	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		this.ctx = ctx;
 		this.canvas = canvas;
@@ -73,6 +74,7 @@ class mapRenderer {
 
 		//top right bottom left
 		this.validMovements = [1, 1, 1, 1];
+		this.cardRotation = 0;
 	}
 
 	initializeMap(value: number) {
@@ -84,9 +86,7 @@ class mapRenderer {
 			this.mapArray.push(row);
 		}
 		this.mapArray[4][4] = 3;
-		this.mapArray[3][3] = 0;
 		this.mapArray[20][4] = 5;
-		console.log(this.mapArray);
 	}
 
 	rotateArray(arr, isClockwise) {
@@ -172,25 +172,21 @@ class mapRenderer {
 
 				let isOutOfBounds = false;
 				if (i + y < 0) {
-					console.log("next to top wall");
 					this.validMovements[0] = 0;
 					isOutOfBounds = true;
 				} // else this.validMovements[0] = 1;
 
 				if (i + y >= this.mapHeight) {
-					console.log("next to bottom wall");
 					this.validMovements[2] = 0;
 					isOutOfBounds = true;
 				} //else this.validMovements[2] = 1;
 
 				if (j + x < 0) {
-					console.log("next to right wall");
 					this.validMovements[3] = 0;
 					isOutOfBounds = true;
 				} //else this.validMovements[3] = 1;
 
 				if (j + x >= this.mapWidth) {
-					console.log("next to left wall");
 					this.validMovements[1] = 0;
 					isOutOfBounds = true;
 				} //else this.validMovements[1] = 1;
@@ -279,7 +275,7 @@ class mapRenderer {
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
-				this.ctx.globalAlpha = this.isPlacementValid ? 1 : 0.4;
+				this.ctx.globalAlpha = this.isPlacementValid ? 0.8 : 0.4;
 				switch (this.selectedCardArray[i][j]) {
 					case 1:
 						this.ctx.fillStyle = this.colors.fillColorB;
@@ -310,6 +306,7 @@ class mapRenderer {
 			this.selectedCard = cardID;
 			const cardData = cards.cards[this.selectedCard];
 			this.selectedCardArray = cardData.cardArray;
+			this.cardRotation = 0;
 			//console.log(cards.cards[this.selectedCard])
 		}
 	}
@@ -334,7 +331,6 @@ class mapRenderer {
 	changePosY(y) {
 		if (this.selectedCard != -1) {
 			this.checkMovementDirections();
-			console.log(this.validMovements);
 			if (y == 1) {
 				this.placementY += this.validMovements[2];
 			}
@@ -350,6 +346,7 @@ class mapRenderer {
 	}
 
 	changeRotation(r) {
+		this.cardRotation = (this.cardRotation + r) % 4;
 		if (r == 1) {
 			this.selectedCardArray = this.rotateArray(
 				this.selectedCardArray,
@@ -365,6 +362,64 @@ class mapRenderer {
 		this.isPlacementValid = this.isValidPlacement(
 			this.placementY,
 			this.placementX,
+		);
+	}
+
+	setCard(cardID, rotation, positionX, positionY, player) {
+		const cardData = cards.cards[cardID];
+
+		let cardArray = cardData.cardArray;
+
+		let rotationDirection = Math.sign(rotation);
+
+		console.log(Math.abs(rotation));
+
+		for (let r = 0; r < Math.abs(rotation); r++) {
+			cardArray = this.rotateArray(
+				cardArray,
+				rotationDirection == -1 ? true : false,
+			);
+		}
+
+		for (let i = 0; i < cardData.cardArray.length; i++) {
+			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
+				if (cardArray[i][j] == 0) continue;
+
+				if (cardArray[i][j] == 1) {
+					this.mapArray[i + positionY][j + positionX] =
+						player == 0 ? 6 : 4;
+				}
+
+				if (cardArray[i][j] == 2) {
+					this.mapArray[i + positionY][j + positionX] =
+						player == 0 ? 5 : 3;
+				}
+			}
+		}
+	}
+
+	placeCard(sendCardPosition: CallableFunction) {
+		this.isPlacementValid = this.isValidPlacement(
+			this.placementY,
+			this.placementX,
+		);
+
+		if (!this.isPlacementValid) return;
+		if (this.selectedCard == -1) return;
+
+		sendCardPosition(
+			this.selectedCard,
+			this.cardRotation,
+			this.placementX,
+			this.placementY,
+		);
+
+		this.setCard(
+			this.selectedCard,
+			this.cardRotation,
+			this.placementX,
+			this.placementY,
+			0,
 		);
 	}
 

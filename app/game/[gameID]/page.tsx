@@ -9,10 +9,10 @@ import type { AppProps } from "next/app";
 
 export default function Game({ params }: { params: { slug: string } }) {
 	const [isConnected, setIsConnected] = useState(socket.connected);
-
-	socket.connect();
+	const [isTurn, setTurn] = useState(false.toString());
 
 	useEffect(() => {
+		socket.connect();
 		function onConnect() {
 			setIsConnected(true);
 			socket.emit("joinRoom", { gameID: params["gameID"] });
@@ -32,17 +32,20 @@ export default function Game({ params }: { params: { slug: string } }) {
 			socket.off("connect", onConnect);
 			socket.off("disconnect", onDisconnect);
 			socket.off("getCards", getCards);
+			socket.disconnect();
 		};
 	}, []);
 
+	const sendCardPlacement = (cardID: number, rotation: number, positionX: number, positionY: number) => {
+		console.log('sendingCard')
+		socket.emit("playCard", cardID, rotation, positionX, positionY);
+	};
+
 	console.log(params["gameID"]);
-	const [card, setCard] = useState(-1);
 	return (
 		<main className={styles.main}>
-			<AvailableCards setselectedcard={setCard} />
-			<Map selectedcard={card} />
+			<AvailableCards />
+			<Map sendCardPlacement={sendCardPlacement} />
 		</main>
 	);
 }
-
-
