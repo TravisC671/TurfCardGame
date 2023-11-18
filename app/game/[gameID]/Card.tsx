@@ -1,12 +1,18 @@
 "use client";
 import { useRef } from "react";
 import styles from "./page.module.css";
-export default function Card(props) {
-	let cardArray = props.cardArray;
+import totalCards from "./cards.json";
 
-	let name = props.name;
-	let cardCells = props.cardCells;
-	let specialPoints = props.specialPoints;
+export default function Card(props) {
+	
+	let card = totalCards.cards[props.cardHand[props.id]]
+
+
+	let cardArray = card.cardArray;
+
+	let name = card.name;
+	let cardCells = card.cardCells;
+	let specialPoints = card.specialPoints;
 
 	let specialIndicator = [];
 	for (let i = 0; i < specialPoints; i++) {

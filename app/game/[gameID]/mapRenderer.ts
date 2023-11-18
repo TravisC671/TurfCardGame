@@ -153,7 +153,6 @@ class mapRenderer {
 					this.mapArray[i + yOffset][j + xOffset] != 0
 				) {
 					isOverlapping = true;
-					console.log(this.mapArray[i + yOffset][j + xOffset]);
 				}
 
 				if (this.isNeighboringCell(i + yOffset, j + xOffset)) {
@@ -201,7 +200,6 @@ class mapRenderer {
 				//console.log(cellValue)
 
 				//since cellvalue == 0 we dont need to check it, and since valid movement is reset in the previous spot we dont need to change it
-				console.log("cellVallue", cellValue);
 				if (i == -1 && j == 0) this.validMovements[0] = 0;
 				if (i == 0 && j == 1) this.validMovements[1] = 0;
 				if (i == 1 && j == 0) this.validMovements[2] = 0;
@@ -372,8 +370,6 @@ class mapRenderer {
 
 		let rotationDirection = Math.sign(rotation);
 
-		console.log(Math.abs(rotation));
-
 		for (let r = 0; r < Math.abs(rotation); r++) {
 			cardArray = this.rotateArray(
 				cardArray,
@@ -383,10 +379,11 @@ class mapRenderer {
 
 		for (let i = 0; i < cardData.cardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
-				if (i + positionY < 0 || i + positionY > this.mapWidth) continue
+				if (cardArray[i][j] == 0) continue;
+
+				if (i + positionY < 0 || i + positionY > this.mapHeight) continue
 				if (j + positionX < 0 || j + positionX > this.mapWidth) continue 
 
-				if (cardArray[i][j] == 0) continue;
 
 				if (cardArray[i][j] == 1) {
 					this.mapArray[i + positionY][j + positionX] =
@@ -406,7 +403,7 @@ class mapRenderer {
 		let newRotation = (rotation + 2) % 4
 		let newPosX = positionX;
 		let newPosY = this.mapHeight / 2 - positionY;
-		console.log(newPosY)
+
 		this.setCard(cardID, newRotation, newPosX, newPosY, 1)
 	}
 
