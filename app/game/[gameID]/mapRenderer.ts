@@ -383,6 +383,9 @@ class mapRenderer {
 
 		for (let i = 0; i < cardData.cardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
+				if (i + positionY < 0 || i + positionY > this.mapWidth) continue
+				if (j + positionX < 0 || j + positionX > this.mapWidth) continue 
+
 				if (cardArray[i][j] == 0) continue;
 
 				if (cardArray[i][j] == 1) {
@@ -396,6 +399,15 @@ class mapRenderer {
 				}
 			}
 		}
+	}
+
+	//changes transforms of enemy card only works on symetrical maps
+	transformCard(cardID, rotation, positionX, positionY) {
+		let newRotation = (rotation + 2) % 4
+		let newPosX = positionX;
+		let newPosY = this.mapHeight / 2 - positionY;
+		console.log(newPosY)
+		this.setCard(cardID, newRotation, newPosX, newPosY, 1)
 	}
 
 	placeCard(sendCardPosition) {

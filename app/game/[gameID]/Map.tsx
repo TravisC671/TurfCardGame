@@ -11,6 +11,7 @@ import {
 	observeStore,
 } from "./store/cardSlice";
 import { store } from "./store/store";
+import { socket } from "./socket";
 
 export default function Map(props) {
 	const canvasRef = useRef(null);
@@ -83,9 +84,15 @@ export default function Map(props) {
 			animationFrameId = window.requestAnimationFrame(render);
 		};
 
+		socket.on('revealPlay', (data) => {
+			console.log(data)
+			renderer.transformCard(data.cardID, data.rotation, data.positionX, data.positionY)
+		})
+
 		render();
 
 		return () => {
+			socket.off('revealPlay')
 			window.cancelAnimationFrame(animationFrameId);
 		};
 	}, []);
