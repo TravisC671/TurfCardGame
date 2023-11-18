@@ -61,7 +61,7 @@ export default function Map(props) {
 					break;
 				case " ":
 					console.log('placeItem');
-					renderer.placeCard(props.sendCardPlacement())
+					renderer.placeCard(props.sendCardPlacement)
 					break;
 			}
 		}

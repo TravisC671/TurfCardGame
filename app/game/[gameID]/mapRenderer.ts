@@ -398,7 +398,7 @@ class mapRenderer {
 		}
 	}
 
-	placeCard(sendCardPosition: CallableFunction) {
+	placeCard(sendCardPosition) {
 		this.isPlacementValid = this.isValidPlacement(
 			this.placementY,
 			this.placementX,
