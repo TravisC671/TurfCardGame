@@ -31,6 +31,8 @@ class mapRenderer {
 	isPlacementValid: boolean;
 	validMovements: number[];
 	cardRotation: number;
+
+	isTurn: boolean;
 	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		this.ctx = ctx;
 		this.canvas = canvas;
@@ -75,6 +77,8 @@ class mapRenderer {
 		//top right bottom left
 		this.validMovements = [1, 1, 1, 1];
 		this.cardRotation = 0;
+
+		this.isTurn = false;
 	}
 
 	initializeMap(value: number) {
@@ -270,6 +274,7 @@ class mapRenderer {
 
 	drawHover() {
 		if (this.selectedCard == -1) return;
+		if (!this.isTurn) return;
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
@@ -307,6 +312,11 @@ class mapRenderer {
 			this.cardRotation = 0;
 			//console.log(cards.cards[this.selectedCard])
 		}
+	}
+
+	setTurn(isTurn: boolean) {
+		console.log('turn: ', isTurn)
+		this.isTurn = isTurn;
 	}
 
 	changePosX(x) {
@@ -381,9 +391,10 @@ class mapRenderer {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
 				if (cardArray[i][j] == 0) continue;
 
-				if (i + positionY < 0 || i + positionY > this.mapHeight) continue
-				if (j + positionX < 0 || j + positionX > this.mapWidth) continue 
-
+				if (i + positionY < 0 || i + positionY > this.mapHeight)
+					continue;
+				if (j + positionX < 0 || j + positionX > this.mapWidth)
+					continue;
 
 				if (cardArray[i][j] == 1) {
 					this.mapArray[i + positionY][j + positionX] =
@@ -400,14 +411,29 @@ class mapRenderer {
 
 	//changes transforms of enemy card only works on symetrical maps
 	transformCard(cardID, rotation, positionX, positionY) {
-		let newRotation = (rotation + 2) % 4
-		let newPosX = positionX;
-		let newPosY = this.mapHeight / 2 - positionY;
+		let isMapEvenX = this.mapWidth % 2;
+		let isMapEvenY = this.mapHeight % 2;
 
-		this.setCard(cardID, newRotation, newPosX, newPosY, 1)
+		//assuming map is odd for now
+
+		let newRotation = (rotation + 2) % 4;
+
+		//convert to relative coordinates & flip signs
+		let newPosX = (positionX - (this.mapWidth - 1) / 2) * -1;
+		let newPosY = (positionY - (this.mapHeight - 1) / 2) * -1;
+		//convert back
+		newPosX += (this.mapWidth - 1) / 2 - 6;
+		newPosY += (this.mapHeight - 1) / 2 - 6;
+		/*console.log(
+			`translated positions x:${positionX} -> x\`:${newPosX} y:${positionY} -> y\`:${newPosY}`,
+		);*/
+
+		this.setCard(cardID, newRotation, newPosX, newPosY, 1);
 	}
 
 	placeCard(sendCardPosition) {
+		if (!this.isTurn) return;
+
 		this.isPlacementValid = this.isValidPlacement(
 			this.placementY,
 			this.placementX,
@@ -430,6 +456,8 @@ class mapRenderer {
 			this.placementY,
 			0,
 		);
+
+		this.setTurn(false);
 	}
 
 	render() {

@@ -4,4 +4,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+}
+
+.lfgButton {
+  height: 2.5vh;
+  width: 10vw;
+}
+
+.matchStatusHolder {
+  display: flex;
+  flex-direction: row;
 }

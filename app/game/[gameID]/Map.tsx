@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./page.module.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { mapRenderer } from "./mapRenderer";
 import { useSelector } from "react-redux/es/exports";
 import {
@@ -23,6 +23,8 @@ export default function Map(props) {
 	let renderer: mapRenderer | undefined;
 
 	const setRenderCard = (currentCard) => {
+		console.log('setCard', renderer, currentCard)
+		//! WHY IS THIS BROKEN
 		if (renderer != undefined) {
 			renderer.setSelectedCard(currentCard);
 		}
@@ -61,7 +63,6 @@ export default function Map(props) {
 					renderer.changeRotation(-1);
 					break;
 				case " ":
-					console.log('placeItem');
 					renderer.placeCard(props.sendCardPlacement)
 					break;
 			}
@@ -85,14 +86,21 @@ export default function Map(props) {
 		};
 
 		socket.on('revealPlay', (data) => {
-			console.log(data)
 			renderer.transformCard(data.cardID, data.rotation, data.positionX, data.positionY)
+			renderer.setTurn(true)
+		})
+
+		socket.on('gameStart', (data) => {
+			console.log('Starting Game')
+			renderer.setTurn(true)
 		})
 
 		render();
 
 		return () => {
+			unsubscribe()
 			socket.off('revealPlay')
+			socket.off('gameStart')
 			window.cancelAnimationFrame(animationFrameId);
 		};
 	}, []);
