@@ -30,11 +30,7 @@ export default function Map(props) {
 		}
 	};
 
-	const unsubscribe = store.subscribe(() => {
-		const currentState = select(store.getState());
-
-		setRenderCard(currentState);
-	});
+	
 
 	//TODO add later
 	const moveCursor = (event) => {
@@ -63,7 +59,7 @@ export default function Map(props) {
 					renderer.changeRotation(-1);
 					break;
 				case " ":
-					renderer.placeCard(props.sendCardPlacement)
+					renderer.placeCard(props.sendCardPlacement, props.chooseCard)
 					break;
 			}
 		}
@@ -96,6 +92,12 @@ export default function Map(props) {
 		})
 
 		render();
+
+		const unsubscribe = store.subscribe(() => {
+			const currentState = select(store.getState());
+	
+			setRenderCard(currentState);
+		});
 
 		return () => {
 			unsubscribe()

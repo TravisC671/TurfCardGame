@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 28.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	viewBox="0 0 100 135.17" style="enable-background:new 0 0 100 135.17;" xml:space="preserve">
+	<defs>
+    	<linearGradient id="Gradient1" x1="0" x2="1" y1="0" y2="1">
+   		  <stop class="stop1" offset="0%" />
+   		  <stop class="stop2" offset="55%" />
+   		  <stop class="stop3" offset="100%" />
+   		</linearGradient>
+  	</defs>
+<style type="text/css">
+	.stop1 { stop-color:#cbffc8}
+	.stop2 { stop-color:#92fce7}
+	.stop3 { stop-color:#4cc3f2}
+
+	.st0{fill:#000;stroke:url(#Gradient1);stroke-width:3;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#11192b;stroke-width:3;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#000;stroke-width:11;stroke-miterlimit:10;}
+	.st3{fill:#000;stroke:#000;stroke-width:7;stroke-miterlimit:10;}
+</style>
+<path class="st0" d="M92.29,133.58H7.71c-3.43,0-6.21-2.78-6.21-6.21V7.8c0-3.43,2.78-6.21,6.21-6.21h84.58
+	c3.43,0,6.21,2.78,6.21,6.21v119.58C98.5,130.8,95.72,133.58,92.29,133.58z"/>
+<g>
+	<path class="st1" d="M60.64,175.57"/>
+	<line class="st1" x1="10" y1="111.95" x2="23.44" y2="125.39"/>
+	<line class="st1" x1="10.26" y1="99.23" x2="36.15" y2="125.12"/>
+	<line class="st1" x1="9.81" y1="85.8" x2="49.06" y2="125.05"/>
+	<line class="st1" x1="10" y1="73.01" x2="62.07" y2="125.08"/>
+	<line class="st1" x1="10" y1="60.03" x2="75.05" y2="125.08"/>
+	<line class="st1" x1="10" y1="47.05" x2="88.03" y2="125.08"/>
+	<line class="st1" x1="10" y1="34.07" x2="90.63" y2="114.7"/>
+	<line class="st1" x1="10" y1="21.1" x2="90" y2="101.1"/>
+	<line class="st1" x1="12.44" y1="10.56" x2="89.73" y2="87.85"/>
+	<line class="st1" x1="24.95" y1="10.08" x2="90" y2="75.14"/>
+	<line class="st1" x1="37.93" y1="10.08" x2="90" y2="62.16"/>
+	<line class="st1" x1="50.9" y1="10.08" x2="90" y2="49.18"/>
+	<line class="st1" x1="64.35" y1="10.56" x2="89.69" y2="35.89"/>
+	<line class="st1" x1="76.86" y1="10.08" x2="89.69" y2="22.91"/>
+</g>
+<path class="st2" d="M76.24,125.08H13.39c-1.87,0-3.39-1.52-3.39-3.39V23.84c0-7.6,6.16-13.76,13.76-13.76h62.85
+	c1.87,0,3.39,1.52,3.39,3.39v97.85C90,118.93,83.84,125.08,76.24,125.08z"/>
+<circle class="st3" cx="50" cy="67.58" r="26"/>
+<circle class="st1" cx="50" cy="67.58" r="22.9"/>
+</svg>

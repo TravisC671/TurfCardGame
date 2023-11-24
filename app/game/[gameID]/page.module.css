@@ -7,6 +7,7 @@
   --colorA0: #11192b;
   --colorA1: rgb(83, 133, 208);
   --colorA2: rgb(63, 87, 227);
+  --gradient: linear-gradient(90deg, rgba(255, 182, 123, 1) 0%, rgba(255, 246, 171, 1) 16%, rgba(203, 255, 200, 1) 36%, rgba(146, 252, 231, 1) 58%, rgba(76, 195, 242, 1) 78%, rgba(146, 152, 255, 1) 100%);
 }
 
 .card {
@@ -24,13 +25,13 @@
 
 .cardWrapper {
   display: grid;
-  grid-template-columns: repeat(2,200px);
-  grid-template-rows: repeat(2,275px);
-  grid-gap:30px 30px;
+  grid-template-columns: repeat(2, 200px);
+  grid-template-rows: repeat(2, 275px);
+  grid-gap: 30px 30px;
   background-color: rgb(16, 20, 32);
   padding: 20px;
   border-radius: 10px;
-  border: 2px gray solid ;
+  border: 2px gray solid;
 }
 
 .cardInfo {
@@ -59,6 +60,7 @@
   width: fit-content;
   align-items: center;
 }
+
 .specialPoint {
   width: 15px;
   height: 15px;
@@ -98,4 +100,59 @@
 
 .scoreOnlinePlayer {
   border: #edc785 solid 5px;
+}
+
+.statusWrapper {
+  position: fixed;
+  top: 40%;
+  width: 100%;
+  background-color: #11192b;
+  padding: 20px 0px 20px 0px;
+}
+
+.statusText {
+  width: 100%;
+  text-align: center;
+}
+
+
+.animation {
+  animation: zoomFade 2s cubic-bezier(.86, 0, .07, 1) forwards;
+}
+
+@keyframes zoomFade {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  99% {
+    transform: scale(10);
+    opacity: 0;
+    top: 40%;
+
+  }
+
+  100% {
+    display: none;
+    top: -1000px;
+  }
+}
+
+
+.PlayedCardsWrapper {
+  height: 700px;
+  width: 250px;
+  margin-left: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.PlayedCardBack {
+  transition: .2s;
+}
+
+.PlayedCardBack:hover {
+  transform: scale(1.1);
 }

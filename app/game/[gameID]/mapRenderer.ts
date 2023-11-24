@@ -431,7 +431,7 @@ class mapRenderer {
 		this.setCard(cardID, newRotation, newPosX, newPosY, 1);
 	}
 
-	placeCard(sendCardPosition) {
+	placeCard(sendCardPosition, chooseCard) {
 		if (!this.isTurn) return;
 
 		this.isPlacementValid = this.isValidPlacement(
@@ -456,6 +456,8 @@ class mapRenderer {
 			this.placementY,
 			0,
 		);
+
+		chooseCard()
 
 		this.setTurn(false);
 	}
