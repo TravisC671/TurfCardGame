@@ -78,7 +78,7 @@
 }
 
 .scoreDiv {
-  width: 100%;
+  width: 75px;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
