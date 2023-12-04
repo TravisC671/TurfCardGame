@@ -12,6 +12,7 @@ import {
 } from "./store/cardSlice";
 import { store } from "./store/store";
 import { socket } from "./socket";
+import GenerateMap from "./generateMap";
 
 export default function Map(props) {
 	const canvasRef = useRef(null);
@@ -108,9 +109,12 @@ export default function Map(props) {
 	}, []);
 
 	return (
-		<canvas
-			className={styles.mapCanvas}
-			ref={canvasRef}
-		></canvas>
+		<div>
+			<canvas
+				className={styles.mapCanvas}
+				ref={canvasRef}
+			></canvas>
+			<GenerateMap width={9} height={25} />
+		</div>
 	);
 }

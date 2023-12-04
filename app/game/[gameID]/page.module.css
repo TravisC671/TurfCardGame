@@ -156,3 +156,13 @@
 .PlayedCardBack:hover {
   transform: scale(1.1);
 }
+
+.defaultCell {
+}
+
+.cellContainer {
+  display: grid;
+  grid-template-rows: repeat(var(--mapHeight), 44px);
+  grid-template-columns: repeat(var(--mapWidth), 44px);
+  aspect-ratio: var(--mapWidth) / var(--mapHeight);
+}
