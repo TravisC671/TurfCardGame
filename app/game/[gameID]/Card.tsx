@@ -4,8 +4,25 @@ import styles from "./page.module.css";
 import totalCards from "./cards.json";
 
 export default function Card(props) {
-	
-	let card = totalCards.cards[props.cardHand[props.id]]
+	let card;
+	if (props.cardHand.length < 4) {
+		card = {
+			name: "test",
+			cardCells: 0,
+			specialPoints: 0,
+			cardArray: [
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0]
+			]
+		}
+	} else {
+		card = totalCards.cards[props.cardHand[props.id]]
+	}
 
 
 	let cardArray = card.cardArray;
@@ -45,7 +62,9 @@ export default function Card(props) {
 	})
 
 	const click = (e) => {
-		props.selectCard(props.id)
+		if (props.cardHand.length >= 4) {
+			props.selectCard(props.id)
+		}
 	};
 
 	
