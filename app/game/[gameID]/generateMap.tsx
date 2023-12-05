@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import CardBack from "../../assets/card.svg";
 import EmptyCard from "../../assets/emptyCard.svg";
 import CellEmpty from "../../assets/cell-empty.svg";
-import PowerCell from "../../assets/cell-blue.svg";
+import PowerCell from "../../assets/power-cell.svg";
 import FilledCell from "../../assets/filled-cell.svg";
 export default function GenerateMap(props) {
 	let generatedMap = [];

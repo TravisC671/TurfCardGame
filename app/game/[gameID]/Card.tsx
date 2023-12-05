@@ -24,7 +24,7 @@ export default function Card(props) {
 		card = totalCards.cards[props.cardHand[props.id]]
 	}
 
-
+	if (card == undefined) return;
 	let cardArray = card.cardArray;
 
 	let name = card.name;

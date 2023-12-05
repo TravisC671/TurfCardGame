@@ -1,4 +1,8 @@
 import cards from "./cards.json";
+//import PowerCell from "../../assets/power-cell.svg";
+import React from "react";
+import ReactDOM from "react-dom";
+const PowerCell = require("../../assets/power-cell.svg") as string;
 
 class mapRenderer {
 	ctx: CanvasRenderingContext2D;
@@ -315,7 +319,7 @@ class mapRenderer {
 	}
 
 	setTurn(isTurn: boolean) {
-		console.log('turn: ', isTurn)
+		console.log("turn: ", isTurn);
 		this.isTurn = isTurn;
 	}
 
@@ -397,8 +401,26 @@ class mapRenderer {
 					continue;
 
 				if (cardArray[i][j] == 1) {
+					//TODO  Make this use DOM Elements
 					this.mapArray[i + positionY][j + positionX] =
 						player == 0 ? 6 : 4;
+
+					let selectedCell = document.getElementById(`${i + positionY}-${j + positionX}`);
+					let mainShadow = "#DE3F8F";
+					let mainColor =  player == 0 ? "#FF758F": "#db6f8c";
+					let mainHighlight = "#FF9F80";
+
+					selectedCell.style.setProperty("--m", mainColor);
+					selectedCell.style.setProperty("--s", mainShadow);
+					selectedCell.style.setProperty("--h", mainHighlight);
+					selectedCell.style.setProperty("viewBox", "0 0 100 100");
+
+					//fetch is taking too long. get a better method
+					fetch("/filled-cell.svg")
+						.then((response) => response.text())
+						.then((svgContent) => {
+							selectedCell.innerHTML = svgContent;
+						});
 				}
 
 				if (cardArray[i][j] == 2) {
@@ -457,7 +479,7 @@ class mapRenderer {
 			0,
 		);
 
-		chooseCard()
+		chooseCard();
 
 		this.setTurn(false);
 	}
