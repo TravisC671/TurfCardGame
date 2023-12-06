@@ -41,6 +41,8 @@ class mapRenderer {
 	filledCellSVG: string;
 	powerCellSVG: string;
 	emptyCellSVG: string;
+	hoverFilledCellSVG: string;
+
 	changedHoverCells: number[][];
 	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		this.ctx = ctx;
@@ -102,11 +104,16 @@ class mapRenderer {
 			.then((svgContent) => {
 				this.powerCellSVG = svgContent;
 			});
-		
-			fetch("/empty-cell.svg")
+
+		fetch("/empty-cell.svg")
 			.then((response) => response.text())
 			.then((svgContent) => {
 				this.emptyCellSVG = svgContent;
+			});
+		fetch("/hover-filled-cell.svg")
+			.then((response) => response.text())
+			.then((svgContent) => {
+				this.hoverFilledCellSVG = svgContent;
 			});
 	}
 
@@ -307,8 +314,56 @@ class mapRenderer {
 
 		//set affected cards from previous hover render
 		for (let i = 0; i < this.changedHoverCells.length; i++) {
-			let pos = this.changedHoverCells[i]
-			this.setCellElement(pos[1], pos[0], this.emptyCellSVG, 0)
+			let pos = this.changedHoverCells[i];
+			let cell = this.mapArray[pos[0]][pos[1]];
+			console.log(cell);
+			switch (cell) {
+				case 1:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.emptyCellSVG,
+						0,
+						true,
+					);
+					break;
+				case 3:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.powerCellSVG,
+						1,
+						false,
+					);
+					break;
+				case 4:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.filledCellSVG,
+						1,
+						false,
+					);
+					break;
+				case 5:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.powerCellSVG,
+						0,
+						false,
+					);
+					break;
+				case 6:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.filledCellSVG,
+						0,
+						false,
+					);
+					break;
+			}
 		}
 		this.changedHoverCells = [];
 
@@ -335,7 +390,10 @@ class mapRenderer {
 					);
 				}
 				if (this.selectedCardArray[i][j] != 0) {
-					this.changedHoverCells.push([i + this.placementY, j + this.placementX]);
+					this.changedHoverCells.push([
+						i + this.placementY,
+						j + this.placementX,
+					]);
 				} else {
 					continue;
 				}
@@ -345,12 +403,14 @@ class mapRenderer {
 				);
 
 				let hoverContainer = document.createElement("div");
-				
-				hoverContainer.innerHTML = this.filledCellSVG;
+
+				hoverContainer.style.setProperty("--c", "#55bfe2")
+				hoverContainer.style.setProperty("--o", this.isPlacementValid ? '0.8' : '0.4')
+
+				hoverContainer.innerHTML = this.hoverFilledCellSVG;
 				hoverContainer.className = styles.cellHover;
 
 				selectedCell.appendChild(hoverContainer);
-				console.log(selectedCell)
 				//create an array of all the selected elements
 				//add the hovered element
 				//on next frame, set the cell to the state of the map array
@@ -456,39 +516,52 @@ class mapRenderer {
 					this.mapArray[i + positionY][j + positionX] =
 						player == 0 ? 6 : 4;
 
-					this.setCellElement(j + positionX, i + positionY, this.filledCellSVG, player)
+					this.setCellElement(
+						j + positionX,
+						i + positionY,
+						this.filledCellSVG,
+						player,
+						false,
+					);
 				}
 
 				if (cardArray[i][j] == 2) {
 					this.mapArray[i + positionY][j + positionX] =
 						player == 0 ? 5 : 3;
 
-					this.setCellElement(j + positionX, i + positionY, this.powerCellSVG, player)
+					this.setCellElement(
+						j + positionX,
+						i + positionY,
+						this.powerCellSVG,
+						player,
+						false,
+					);
 				}
 			}
 		}
 	}
 
-	setCellElement(x, y, svgElement, player) {
+	setCellElement(x, y, svgElement, player, clear: boolean) {
 		let cellContainer = document.createElement("div");
-
-		let selectedCell = document.getElementById(
-			`${y}-${x}`,
-		);
 
 		let mainShadow = player == 0 ? "#4489E4" : "#E2559C";
 		let mainColor = player == 0 ? "#55BFE2" : "#FF758F";
 		let mainHighlight = player == 0 ? "#8DF2F2" : "#FF9875";
 
-		selectedCell.style.setProperty("--m", mainColor);
-		selectedCell.style.setProperty("--s", mainShadow);
-		selectedCell.style.setProperty("--h", mainHighlight);
-		selectedCell.style.setProperty("viewBox", "0 0 100 100");
-		cellContainer.className = styles.cellContent;
+		let selectedCell = document.getElementById(`${y}-${x}`);
+		if (!clear) {
+			selectedCell.style.setProperty("--m", mainColor);
+			selectedCell.style.setProperty("--s", mainShadow);
+			selectedCell.style.setProperty("--h", mainHighlight);
+			selectedCell.style.setProperty("viewBox", "0 0 100 100");
+			cellContainer.className = styles.cellContent;
 
-		cellContainer.innerHTML = svgElement;
+			cellContainer.innerHTML = svgElement;
 
-		selectedCell.replaceChildren(cellContainer)
+			selectedCell.replaceChildren(cellContainer);
+		} else {
+			selectedCell.innerHTML = svgElement;
+		}
 	}
 
 	//changes transforms of enemy card only works on symetrical maps

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="clippath">
+      <rect x="3" y="3" width="94" height="94" rx="8.01" ry="8.01" style="fill: none; stroke-width: 0px;"/>
+    </clipPath>
+  </defs>
+  <rect x="1.5" y="1.5" width="97" height="97" rx="9.51" ry="9.51" style="fill: none; opacity: var(--o); stroke: var(--c); stroke-miterlimit: 10; stroke-width: 3px;"/>
+  <g style="clip-path: url(#clippath);">
+    <rect x="-50.71" y="12.93" width="141.42" height="14.14" transform="translate(-8.28 20) rotate(-45)" style="fill: var(--c); opacity: var(--o); stroke-width: 0px;"/>
+    <rect x="-30.71" y="32.93" width="141.42" height="14.14" transform="translate(-16.57 40) rotate(-45)" style="fill: var(--c); opacity: var(--o); stroke-width: 0px;"/>
+    <rect x="-10.71" y="52.93" width="141.42" height="14.14" transform="translate(-24.85 60) rotate(-45)" style="fill: var(--c); opacity: var(--o); stroke-width: 0px;"/>
+    <rect x="9.29" y="72.93" width="141.42" height="14.14" transform="translate(-33.14 80) rotate(-45)" style="fill: var(--c); opacity: var(--o); stroke-width: 0px;"/>
+  </g>
+</svg>
