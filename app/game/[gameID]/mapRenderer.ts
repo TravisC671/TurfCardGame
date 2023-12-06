@@ -1,8 +1,8 @@
 import cards from "./cards.json";
-//import PowerCell from "../../assets/power-cell.svg";
+import PowerCell from "../../assets/power-cell.svg";
 import React from "react";
 import ReactDOM from "react-dom";
-const PowerCell = require("../../assets/power-cell.svg") as string;
+import styles from "./page.module.css";
 
 class mapRenderer {
 	ctx: CanvasRenderingContext2D;
@@ -37,6 +37,11 @@ class mapRenderer {
 	cardRotation: number;
 
 	isTurn: boolean;
+
+	filledCellSVG: string;
+	powerCellSVG: string;
+	emptyCellSVG: string;
+	changedHoverCells: number[][];
 	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		this.ctx = ctx;
 		this.canvas = canvas;
@@ -83,6 +88,26 @@ class mapRenderer {
 		this.cardRotation = 0;
 
 		this.isTurn = false;
+
+		this.changedHoverCells = [];
+
+		fetch("/filled-cell.svg")
+			.then((response) => response.text())
+			.then((svgContent) => {
+				this.filledCellSVG = svgContent;
+			});
+
+		fetch("/power-cell.svg")
+			.then((response) => response.text())
+			.then((svgContent) => {
+				this.powerCellSVG = svgContent;
+			});
+		
+			fetch("/empty-cell.svg")
+			.then((response) => response.text())
+			.then((svgContent) => {
+				this.emptyCellSVG = svgContent;
+			});
 	}
 
 	initializeMap(value: number) {
@@ -280,6 +305,13 @@ class mapRenderer {
 		if (this.selectedCard == -1) return;
 		if (!this.isTurn) return;
 
+		//set affected cards from previous hover render
+		for (let i = 0; i < this.changedHoverCells.length; i++) {
+			let pos = this.changedHoverCells[i]
+			this.setCellElement(pos[1], pos[0], this.emptyCellSVG, 0)
+		}
+		this.changedHoverCells = [];
+
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
 				this.ctx.globalAlpha = this.isPlacementValid ? 0.8 : 0.4;
@@ -302,6 +334,26 @@ class mapRenderer {
 						this.cellSize,
 					);
 				}
+				if (this.selectedCardArray[i][j] != 0) {
+					this.changedHoverCells.push([i + this.placementY, j + this.placementX]);
+				} else {
+					continue;
+				}
+
+				let selectedCell = document.getElementById(
+					`${i + this.placementY}-${j + this.placementX}`,
+				);
+
+				let hoverContainer = document.createElement("div");
+				
+				hoverContainer.innerHTML = this.filledCellSVG;
+				hoverContainer.className = styles.cellHover;
+
+				selectedCell.appendChild(hoverContainer);
+				console.log(selectedCell)
+				//create an array of all the selected elements
+				//add the hovered element
+				//on next frame, set the cell to the state of the map array
 				this.ctx.globalAlpha = 1;
 			}
 		}
@@ -401,34 +453,42 @@ class mapRenderer {
 					continue;
 
 				if (cardArray[i][j] == 1) {
-					//TODO  Make this use DOM Elements
 					this.mapArray[i + positionY][j + positionX] =
 						player == 0 ? 6 : 4;
 
-					let selectedCell = document.getElementById(`${i + positionY}-${j + positionX}`);
-					let mainShadow = "#DE3F8F";
-					let mainColor =  player == 0 ? "#FF758F": "#db6f8c";
-					let mainHighlight = "#FF9F80";
-
-					selectedCell.style.setProperty("--m", mainColor);
-					selectedCell.style.setProperty("--s", mainShadow);
-					selectedCell.style.setProperty("--h", mainHighlight);
-					selectedCell.style.setProperty("viewBox", "0 0 100 100");
-
-					//fetch is taking too long. get a better method
-					fetch("/filled-cell.svg")
-						.then((response) => response.text())
-						.then((svgContent) => {
-							selectedCell.innerHTML = svgContent;
-						});
+					this.setCellElement(j + positionX, i + positionY, this.filledCellSVG, player)
 				}
 
 				if (cardArray[i][j] == 2) {
 					this.mapArray[i + positionY][j + positionX] =
 						player == 0 ? 5 : 3;
+
+					this.setCellElement(j + positionX, i + positionY, this.powerCellSVG, player)
 				}
 			}
 		}
+	}
+
+	setCellElement(x, y, svgElement, player) {
+		let cellContainer = document.createElement("div");
+
+		let selectedCell = document.getElementById(
+			`${y}-${x}`,
+		);
+
+		let mainShadow = player == 0 ? "#4489E4" : "#E2559C";
+		let mainColor = player == 0 ? "#55BFE2" : "#FF758F";
+		let mainHighlight = player == 0 ? "#8DF2F2" : "#FF9875";
+
+		selectedCell.style.setProperty("--m", mainColor);
+		selectedCell.style.setProperty("--s", mainShadow);
+		selectedCell.style.setProperty("--h", mainHighlight);
+		selectedCell.style.setProperty("viewBox", "0 0 100 100");
+		cellContainer.className = styles.cellContent;
+
+		cellContainer.innerHTML = svgElement;
+
+		selectedCell.replaceChildren(cellContainer)
 	}
 
 	//changes transforms of enemy card only works on symetrical maps

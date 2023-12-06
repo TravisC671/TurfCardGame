@@ -17,10 +17,6 @@ import GenerateMap from "./generateMap";
 export default function Map(props) {
 	const canvasRef = useRef(null);
 
-	const draw = (renderer: mapRenderer) => {
-		renderer.render();
-	};
-
 	let renderer: mapRenderer | undefined;
 
 	const setRenderCard = (currentCard) => {
@@ -63,28 +59,22 @@ export default function Map(props) {
 					renderer.placeCard(props.sendCardPlacement, props.chooseCard)
 					break;
 			}
+			renderer.render();
 		}
 	};
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const context = canvas.getContext("2d");
-		let frameCount = 0;
-		let animationFrameId;
 
 		renderer = new mapRenderer(context, canvas);
 
 		document.addEventListener("keydown", handleKeyDown);
 
-		const render = () => {
-			frameCount++;
-			draw(renderer);
-			animationFrameId = window.requestAnimationFrame(render);
-		};
-
 		socket.on('revealPlay', (data) => {
 			renderer.transformCard(data.cardID, data.rotation, data.positionX, data.positionY)
 			renderer.setTurn(true)
+			renderer.render();
 		})
 
 		socket.on('gameStart', (data) => {
@@ -92,19 +82,18 @@ export default function Map(props) {
 			renderer.setTurn(true)
 		})
 
-		render();
-
 		const unsubscribe = store.subscribe(() => {
 			const currentState = select(store.getState());
 	
 			setRenderCard(currentState);
 		});
 
+		renderer.render();
+
 		return () => {
 			unsubscribe()
 			socket.off('revealPlay')
 			socket.off('gameStart')
-			window.cancelAnimationFrame(animationFrameId);
 		};
 	}, []);
 

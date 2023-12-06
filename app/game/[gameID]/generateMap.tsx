@@ -34,26 +34,6 @@ export default function GenerateMap(props) {
 						></PowerCell>
 					</div>,
 				);
-			} else if (i == 5 && j == 4) {
-				row.push(
-					<div
-						key={idName}
-						id={idName}
-						className={styles.defaultCell}
-					>
-						<FilledCell></FilledCell>
-					</div>,
-				);
-			} else if (i == 5 && j == 3) {
-				row.push(
-					<div
-						key={idName}
-						id={idName}
-						className={styles.defaultCell}
-					>
-						<FilledCell></FilledCell>
-					</div>,
-				);
 			} else if (i == 20 && j == 4) {
 				let secondaryShadow = "#4489E4";
 				let secondaryColor = "#55BFE2";

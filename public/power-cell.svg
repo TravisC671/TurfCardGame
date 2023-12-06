@@ -2,15 +2,15 @@
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
   <defs>
     <style>
-      .cls-1 {
+      .cls-highlight {
         fill: var(--h);
       }
 
-      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+      .cls-highlight, .cls-shadow, .cls-3, .cls-4, .cls-5 {
         stroke-width: 0px;
       }
 
-      .cls-2 {
+      .cls-shadow {
         fill: var(--s);
       }
 
@@ -36,8 +36,8 @@
   </defs>
   <rect class="cls-5" y="0" width="100" height="100"/>
   <g class="cls-6">
-    <polygon class="cls-2" points="100 100 0 0 0 100 100 100"/>
-    <polygon class="cls-1" points="0 0 100 100 100 0 0 0"/>
+    <polygon class="cls-shadow" points="100 100 0 0 0 100 100 100"/>
+    <polygon class="cls-highlight" points="0 0 100 100 100 0 0 0"/>
   </g>
   <rect class="cls-4" x="17.33" y="17.33" width="65.33" height="65.33" rx="1.61" ry="1.61"/>
 </svg>

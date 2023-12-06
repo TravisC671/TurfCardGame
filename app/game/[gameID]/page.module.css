@@ -104,6 +104,7 @@
 
 .statusWrapper {
   position: fixed;
+  z-index: 999;
   top: 40%;
   width: 100%;
   background-color: #11192b;
@@ -158,6 +159,24 @@
 }
 
 .defaultCell {
+  position: relative;
+}
+
+.cellContent {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.cellHover {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
 }
 
 .cellContainer {
