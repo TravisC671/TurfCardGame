@@ -10,11 +10,14 @@ import { socket } from "./socket";
 
 export default function AvailableCards(props) {
   const [cardHand, setCardHand] = useState([])
+  const [selectedCardPos, setSelectedCardPos] = useState([])
+
 	const card = useSelector(selectCardState);
 
   useEffect(() => {
     socket.on('dealHand', (data) => {
       setCardHand(data.cards)
+      console.log(data.cards)
     })
     return
   }, [])
@@ -23,15 +26,15 @@ export default function AvailableCards(props) {
 
   const selectCard = (id) => {
     dispatch(setSelectedCard(cardHand[id]))
-    //console.log('selected card', id)
+    setSelectedCardPos(id)
   }
 
   return (
     <div className={styles.cardWrapper}>
-        <Card id={0} selectedCard={card} selectCard={selectCard} cardHand={cardHand} />
-        <Card id={1} selectedCard={card} selectCard={selectCard} cardHand={cardHand} />
-        <Card id={2} selectedCard={card} selectCard={selectCard} cardHand={cardHand} />
-        <Card id={3} selectedCard={card} selectCard={selectCard} cardHand={cardHand} />
+        <Card id={0} selectedCard={selectedCardPos} selectCard={selectCard} cardHand={cardHand} />
+        <Card id={1} selectedCard={selectedCardPos} selectCard={selectCard} cardHand={cardHand} />
+        <Card id={2} selectedCard={selectedCardPos} selectCard={selectCard} cardHand={cardHand} />
+        <Card id={3} selectedCard={selectedCardPos} selectCard={selectCard} cardHand={cardHand} />
     </div>
   )
 }

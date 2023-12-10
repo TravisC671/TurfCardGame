@@ -25,6 +25,7 @@ export default function Card(props) {
 	}
 
 	if (card == undefined) return;
+
 	let cardArray = card.cardArray;
 
 	let name = card.name;
@@ -37,8 +38,6 @@ export default function Card(props) {
 			<div key={i} className={styles.specialPoint}></div>,
 		);
 	}
-
-	let isSelected = false
 
 	const cardRef = useRef(null);
 

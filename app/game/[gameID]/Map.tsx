@@ -15,7 +15,6 @@ import { socket } from "./socket";
 import GenerateMap from "./generateMap";
 
 export default function Map(props) {
-	const canvasRef = useRef(null);
 
 	let renderer: mapRenderer | undefined;
 
@@ -24,6 +23,7 @@ export default function Map(props) {
 		//! WHY IS THIS BROKEN
 		if (renderer != undefined) {
 			renderer.setSelectedCard(currentCard);
+			renderer.render()
 		}
 	};
 
@@ -64,10 +64,8 @@ export default function Map(props) {
 	};
 
 	useEffect(() => {
-		const canvas = canvasRef.current;
-		const context = canvas.getContext("2d");
 
-		renderer = new mapRenderer(context, canvas);
+		renderer = new mapRenderer();
 
 		document.addEventListener("keydown", handleKeyDown);
 
@@ -99,10 +97,6 @@ export default function Map(props) {
 
 	return (
 		<div>
-			<canvas
-				className={styles.mapCanvas}
-				ref={canvasRef}
-			></canvas>
 			<GenerateMap width={9} height={25} />
 		</div>
 	);

@@ -4,9 +4,19 @@ import React from "react";
 import ReactDOM from "react-dom";
 import styles from "./page.module.css";
 
+enum cellValues {
+	Void = 0,
+	empty = 1,
+	wall = 2,
+	powerCellA = 3,
+	fillCell = 4,
+	powerCellB = 5,
+	fillColorB = 6,
+	empoweredSpecialA = 7,
+	empoweredSpecialB = 8,
+}
+
 class mapRenderer {
-	ctx: CanvasRenderingContext2D;
-	canvas: HTMLCanvasElement;
 	mapWidth: number;
 	mapHeight: number;
 	mapArray: number[][];
@@ -20,14 +30,11 @@ class mapRenderer {
 		fillColorB: string;
 	};
 
-	cellSize: number;
-	padding: number;
 	shiftOffsetX: number;
 	shiftOffsetY: number;
 
 	selectedCard: number;
 	selectedCardArray: number[][];
-	selectedCardRotationUncapped: number;
 	selectedCardRotation: number;
 
 	placementX: number;
@@ -44,12 +51,7 @@ class mapRenderer {
 	hoverFilledCellSVG: string;
 
 	changedHoverCells: number[][];
-	constructor(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-		this.ctx = ctx;
-		this.canvas = canvas;
-		this.canvas.width = this.canvas.offsetWidth;
-		this.canvas.height = this.canvas.offsetHeight;
-
+	constructor() {
 		this.mapWidth = 9;
 		this.mapHeight = 25;
 
@@ -57,6 +59,7 @@ class mapRenderer {
 
 		this.initializeMap(1);
 
+		//update to new colors
 		this.colors = {
 			border: "#090d17",
 			empty: "#11192b",
@@ -67,23 +70,10 @@ class mapRenderer {
 			fillColorB: "#70a7ff",
 		};
 
-		this.cellSize = 35;
-		this.padding = 4;
-		this.shiftOffsetX =
-			(this.canvas.width -
-				(this.cellSize + this.padding) * this.mapWidth) /
-			2;
-		this.shiftOffsetY =
-			(this.canvas.height -
-				(this.cellSize + this.padding) * this.mapHeight) /
-			2;
-
 		this.selectedCard = -1;
 
 		this.placementX = 1;
 		this.placementY = 17;
-
-		this.selectedCardRotationUncapped = 0;
 
 		//top right bottom left
 		this.validMovements = [1, 1, 1, 1];
@@ -117,6 +107,11 @@ class mapRenderer {
 			});
 	}
 
+	/**
+	 * this initializes the mapArray
+	 * @param value this is the value that all the cells are set to
+	 * TODO make it able to handle different maps
+	 */
 	initializeMap(value: number) {
 		for (let i = 0; i < this.mapHeight; i++) {
 			let row = [];
@@ -129,7 +124,13 @@ class mapRenderer {
 		this.mapArray[20][4] = 5;
 	}
 
-	rotateArray(arr, isClockwise) {
+	/**
+	 *
+	 * @param arr this is the array to be rotated
+	 * @param isClockwise true to rotate the array clockwise and false for counter clockwise
+	 * @returns rotated array
+	 */
+	rotateArray(arr: number[][], isClockwise: boolean): number[][] {
 		const size = arr.length;
 		const rotatedArray = new Array(size)
 			.fill(0)
@@ -148,7 +149,15 @@ class mapRenderer {
 		return rotatedArray;
 	}
 
-	isNeighboringCell(y: number, x: number) {
+	/**
+	 * this checks if a given cell is neighboring another cell
+	 * @param y y position of the cell
+	 * @param x x position of the cell
+	 * @returns a boolean that determines if there is a neigboring cell
+	 * TODO make this so it checks and validates the online player's placement
+	 * TODO if invalid, request the entire mapstate from the server
+	 */
+	isNeighboringCell(y: number, x: number): boolean {
 		//returns true if next to a neighbor
 		//returns false if no neigbors or is on top of a neigbor
 		if (this.mapArray[y][x] == 5 || this.mapArray[y][x] == 6) return false;
@@ -172,6 +181,12 @@ class mapRenderer {
 		return isNeigboringCell;
 	}
 
+	/**
+	 * this checks if the selected card is in a valid placement, making sure cells arent out of bounds or overlapping cells
+	 * @param yOffset y offset of the card
+	 * @param xOffset x offset of the card
+	 * @returns boolean that depends of if the placement is valid
+	 */
 	isValidPlacement(yOffset: number, xOffset: number): boolean {
 		if (this.selectedCardArray == undefined) {
 			return;
@@ -204,7 +219,12 @@ class mapRenderer {
 		return !isOverlapping && isPositionValid ? true : false;
 	}
 
-	isNextToWall(y: number, x: number) {
+	/**
+	 * this checks if the cell is next to a wall and makes sure cards cant go out of bounds by updating the validMovements array
+	 * @param y y position of the cell
+	 * @param x x position of the cell
+	 */
+	isNextToWall(y: number, x: number): void {
 		for (let i = -1; i <= 1; i++) {
 			for (let j = -1; j <= 1; j++) {
 				//this seems a bit redundant but idk another way to do it
@@ -230,7 +250,7 @@ class mapRenderer {
 					isOutOfBounds = true;
 				} //else this.validMovements[1] = 1;
 
-				if ((j == x && i == y) || isOutOfBounds) {
+				if ((j == 0 && i == 0) || isOutOfBounds) {
 					continue;
 				}
 
@@ -248,7 +268,74 @@ class mapRenderer {
 		}
 	}
 
-	checkMovementDirections() {
+	/**
+	 * checks weather the given cell is surrounded
+	 * @param y y position of the cell
+	 * @param x x position of the cell
+	 * @returns boolean depending on if the cell was surrounded
+	 */
+	getNeighbors(y: number, x: number): number {
+		let neighbors = 0;
+		for (let i = -1; i <= 1; i++) {
+			for (let j = -1; j <= 1; j++) {
+				let isOutOfBoundsX = false;
+				let isOutOfBoundsY = false;
+
+				if (i + y < 0) {
+					neighbors += 3;
+					isOutOfBoundsY = true;
+				}
+
+				if (i + y >= this.mapHeight) {
+					neighbors += 3;
+					isOutOfBoundsY = true;
+				}
+
+				//by checking if the y is out of bounds we can make sure we dont double count corners
+				if (j + x < 0 && isOutOfBoundsY) {
+					neighbors += 2;
+					isOutOfBoundsX = true;
+				} else if (j + x < 0) neighbors += 3
+
+				if (j + x >= this.mapWidth && isOutOfBoundsY) {
+					neighbors += 2;
+					isOutOfBoundsX = true;
+				} else if (j + x >= this.mapWidth) neighbors += 3
+
+				if ((j == 0 && i == 0) || isOutOfBoundsX || isOutOfBoundsY) {
+					continue;
+				}
+
+				let cellValue = this.mapArray[i + y][j + x];
+
+				if (cellValue != 1) neighbors += 1;
+			}
+		}
+		return neighbors;
+	}
+
+	checkSpecials(): void {
+		for (let i = 0; i < this.mapArray.length; i++) {
+
+			for (let j = 0; j < this.mapArray[0].length; j++) {
+
+				let cellValue = this.mapArray[i][j];
+
+				if (cellValue == 3 || cellValue == 5) {
+					let neigbors = this.getNeighbors(i, j);
+					if (neigbors == 8) {
+						console.log('special spoted')
+						this.mapArray[i][j] = ( cellValue == 3 ) ? 7 : 8;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * this checks each cell of the selected card and checks if it is able to move
+	 */
+	checkMovementDirections(): void {
 		this.validMovements = [1, 1, 1, 1];
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
@@ -260,55 +347,10 @@ class mapRenderer {
 		}
 	}
 
-	drawGrid() {
-		for (let i = 0; i < this.mapHeight; i++) {
-			for (let j = 0; j < this.mapWidth; j++) {
-				if (this.mapArray[i][j] == 0) continue;
-
-				this.ctx.fillStyle = this.colors.border;
-				this.ctx.fillRect(
-					j * (this.cellSize + this.padding) +
-						this.shiftOffsetX -
-						this.padding,
-					i * (this.cellSize + this.padding) +
-						this.shiftOffsetY -
-						this.padding,
-					this.cellSize + this.padding * 2,
-					this.cellSize + this.padding * 2,
-				);
-
-				switch (this.mapArray[i][j]) {
-					case 1:
-						this.ctx.fillStyle = this.colors.empty;
-						break;
-					case 2:
-						this.ctx.fillStyle = this.colors.wall;
-						break;
-					case 3:
-						this.ctx.fillStyle = this.colors.powerCellA;
-						break;
-					case 4:
-						this.ctx.fillStyle = this.colors.fillColorA;
-						break;
-					case 5:
-						this.ctx.fillStyle = this.colors.powerCellB;
-						break;
-					case 6:
-						this.ctx.fillStyle = this.colors.fillColorB;
-						break;
-				}
-
-				this.ctx.fillRect(
-					j * (this.cellSize + this.padding) + this.shiftOffsetX,
-					i * (this.cellSize + this.padding) + this.shiftOffsetY,
-					this.cellSize,
-					this.cellSize,
-				);
-			}
-		}
-	}
-
-	drawHover() {
+	/**
+	 * this draws the hovered state of the selected card
+	 */
+	drawHover(): void {
 		if (this.selectedCard == -1) return;
 		if (!this.isTurn) return;
 
@@ -316,7 +358,6 @@ class mapRenderer {
 		for (let i = 0; i < this.changedHoverCells.length; i++) {
 			let pos = this.changedHoverCells[i];
 			let cell = this.mapArray[pos[0]][pos[1]];
-			console.log(cell);
 			switch (cell) {
 				case 1:
 					this.setCellElement(
@@ -325,6 +366,7 @@ class mapRenderer {
 						this.emptyCellSVG,
 						0,
 						true,
+						false,
 					);
 					break;
 				case 3:
@@ -333,6 +375,7 @@ class mapRenderer {
 						pos[0],
 						this.powerCellSVG,
 						1,
+						false,
 						false,
 					);
 					break;
@@ -343,6 +386,7 @@ class mapRenderer {
 						this.filledCellSVG,
 						1,
 						false,
+						false,
 					);
 					break;
 				case 5:
@@ -351,6 +395,7 @@ class mapRenderer {
 						pos[0],
 						this.powerCellSVG,
 						0,
+						false,
 						false,
 					);
 					break;
@@ -361,6 +406,7 @@ class mapRenderer {
 						this.filledCellSVG,
 						0,
 						false,
+						false,
 					);
 					break;
 			}
@@ -369,26 +415,6 @@ class mapRenderer {
 
 		for (let i = 0; i < this.selectedCardArray.length; i++) {
 			for (let j = 0; j < this.selectedCardArray[0].length; j++) {
-				this.ctx.globalAlpha = this.isPlacementValid ? 0.8 : 0.4;
-				switch (this.selectedCardArray[i][j]) {
-					case 1:
-						this.ctx.fillStyle = this.colors.fillColorB;
-						break;
-					case 2:
-						this.ctx.fillStyle = this.colors.powerCellB;
-						break;
-				}
-
-				if (this.selectedCardArray[i][j] != 0) {
-					this.ctx.fillRect(
-						(j + this.placementX) * (this.cellSize + this.padding) +
-							this.shiftOffsetX,
-						(i + this.placementY) * (this.cellSize + this.padding) +
-							this.shiftOffsetY,
-						this.cellSize,
-						this.cellSize,
-					);
-				}
 				if (this.selectedCardArray[i][j] != 0) {
 					this.changedHoverCells.push([
 						i + this.placementY,
@@ -402,10 +428,18 @@ class mapRenderer {
 					`${i + this.placementY}-${j + this.placementX}`,
 				);
 
+				if (selectedCell == null) continue;
+
 				let hoverContainer = document.createElement("div");
 
-				hoverContainer.style.setProperty("--c", "#55bfe2")
-				hoverContainer.style.setProperty("--o", this.isPlacementValid ? '0.8' : '0.4')
+				hoverContainer.style.setProperty(
+					"--c",
+					( this.selectedCardArray[i][j] == 1 ) ? "#55bfe2" : "#4489e4",
+				);
+				hoverContainer.style.setProperty(
+					"--o",
+					( this.isPlacementValid ) ? "0.8" : "0.4",
+				);
 
 				hoverContainer.innerHTML = this.hoverFilledCellSVG;
 				hoverContainer.className = styles.cellHover;
@@ -414,12 +448,15 @@ class mapRenderer {
 				//create an array of all the selected elements
 				//add the hovered element
 				//on next frame, set the cell to the state of the map array
-				this.ctx.globalAlpha = 1;
 			}
 		}
 	}
 
-	setSelectedCard(cardID) {
+	/**
+	 * sets the selected card
+	 * @param cardID ID of the card which can be found in the card.json file
+	 */
+	setSelectedCard(cardID): void {
 		//TODO check if the new card is outside of the array and correct it
 		if (cardID != -1) {
 			this.selectedCard = cardID;
@@ -430,12 +467,20 @@ class mapRenderer {
 		}
 	}
 
-	setTurn(isTurn: boolean) {
+	/**
+	 * sets the turn
+	 * @param isTurn boolean if its your turn or not
+	 */
+	setTurn(isTurn: boolean): void {
 		console.log("turn: ", isTurn);
 		this.isTurn = isTurn;
 	}
 
-	changePosX(x) {
+	/**
+	 * changes the position of the card on the X axis
+	 * @param x either 1 or -1. this checks the movement and makes sure its a valid placement
+	 */
+	changePosX(x: number): void {
 		if (this.selectedCard != -1) {
 			this.checkMovementDirections();
 			if (x == 1) {
@@ -452,7 +497,11 @@ class mapRenderer {
 		);
 	}
 
-	changePosY(y) {
+	/**
+	 * changes the position of the card on the Y axis
+	 * @param y either 1 or -1. this checks the movement and makes sure its a valid placement
+	 */
+	changePosY(y: number): void {
 		if (this.selectedCard != -1) {
 			this.checkMovementDirections();
 			if (y == 1) {
@@ -469,7 +518,11 @@ class mapRenderer {
 		);
 	}
 
-	changeRotation(r) {
+	/**
+	 * changes the rotation of the selected card array
+	 * @param r 1 for counter clockwise and -1 for clockwise
+	 */
+	changeRotation(r: number): void {
 		this.cardRotation = (this.cardRotation + r) % 4;
 		if (r == 1) {
 			this.selectedCardArray = this.rotateArray(
@@ -489,7 +542,15 @@ class mapRenderer {
 		);
 	}
 
-	setCard(cardID, rotation, positionX, positionY, player) {
+	/**
+	 * This places a card on the card Array
+	 * @param cardID ID of the card to be placed
+	 * @param rotation how many times the card needs to be rotated
+	 * @param positionX x position of the card
+	 * @param positionY y position of the card
+	 * @param player the player that placed this card
+	 */
+	setCard(cardID, rotation, positionX, positionY, player): void {
 		const cardData = cards.cards[cardID];
 
 		let cardArray = cardData.cardArray;
@@ -499,7 +560,7 @@ class mapRenderer {
 		for (let r = 0; r < Math.abs(rotation); r++) {
 			cardArray = this.rotateArray(
 				cardArray,
-				rotationDirection == -1 ? true : false,
+				( rotationDirection == -1 ) ? true : false,
 			);
 		}
 
@@ -514,7 +575,7 @@ class mapRenderer {
 
 				if (cardArray[i][j] == 1) {
 					this.mapArray[i + positionY][j + positionX] =
-						player == 0 ? 6 : 4;
+						( player == 0 ) ? 6 : 4;
 
 					this.setCellElement(
 						j + positionX,
@@ -522,12 +583,13 @@ class mapRenderer {
 						this.filledCellSVG,
 						player,
 						false,
+						true,
 					);
 				}
 
 				if (cardArray[i][j] == 2) {
 					this.mapArray[i + positionY][j + positionX] =
-						player == 0 ? 5 : 3;
+						( player == 0 ) ? 5 : 3;
 
 					this.setCellElement(
 						j + positionX,
@@ -535,26 +597,54 @@ class mapRenderer {
 						this.powerCellSVG,
 						player,
 						false,
+						true,
 					);
 				}
 			}
 		}
 	}
 
-	setCellElement(x, y, svgElement, player, clear: boolean) {
+	/**
+	 * This sets the dom element of the cell
+	 * @param x x location of the cell
+	 * @param y y location of the cell
+	 * @param svgElement svg string to be put inside the cell
+	 * @param player which player placed the cell, either 0 or 1
+	 * @param clear clears all elements inside the cell if left true
+	 * @param placeAnim unused. true if you want to playe the place animation
+	 */
+	setCellElement(
+		x: number,
+		y: number,
+		svgElement: string,
+		player: number,
+		clear: boolean,
+		placeAnim: boolean,
+	) {
 		let cellContainer = document.createElement("div");
 
-		let mainShadow = player == 0 ? "#4489E4" : "#E2559C";
-		let mainColor = player == 0 ? "#55BFE2" : "#FF758F";
-		let mainHighlight = player == 0 ? "#8DF2F2" : "#FF9875";
+		let mainShadow = ( player == 0 ) ? "#4489E4" : "#de3f8f";
+		let mainColor = ( player == 0 ) ? "#55BFE2" : "#ff758f";
+		let mainHighlight = ( player == 0 ) ? "#8DF2F2" : "#ff9f80";
+
+		let activatedShadow = ( player == 0 ) ? "#70A5EB" : "#EA81B5";
+		let activatedColor = ( player == 0 ) ? "#81CFEA" : "#FFA8B8";
+		let activatedHighlight = ( player == 0 ) ? "#BAF7F7" : "#FFBEA8";
 
 		let selectedCell = document.getElementById(`${y}-${x}`);
+		if (placeAnim) {
+			//cellContainer.classList.add(styles.place)
+		}
 		if (!clear) {
+			if (svgElement == this.powerCellSVG) {
+				this.isNeighboringCell;
+			}
 			selectedCell.style.setProperty("--m", mainColor);
 			selectedCell.style.setProperty("--s", mainShadow);
 			selectedCell.style.setProperty("--h", mainHighlight);
+			//selectedCell.style.setProperty("--slamSize", placeAnim ? '1.5' : '1');
 			selectedCell.style.setProperty("viewBox", "0 0 100 100");
-			cellContainer.className = styles.cellContent;
+			cellContainer.classList.add(styles.cellContent);
 
 			cellContainer.innerHTML = svgElement;
 
@@ -564,7 +654,13 @@ class mapRenderer {
 		}
 	}
 
-	//changes transforms of enemy card only works on symetrical maps
+	/**
+	 * changes transforms of enemy card only works on symetrical maps. this algorithm needs help lol
+	 * @param cardID id of the card
+	 * @param rotation rotation of the card from the enemy pov
+	 * @param positionX x position from the enemy pov
+	 * @param positionY y position from the enempy pov
+	 */
 	transformCard(cardID, rotation, positionX, positionY) {
 		let isMapEvenX = this.mapWidth % 2;
 		let isMapEvenY = this.mapHeight % 2;
@@ -586,7 +682,12 @@ class mapRenderer {
 		this.setCard(cardID, newRotation, newPosX, newPosY, 1);
 	}
 
-	placeCard(sendCardPosition, chooseCard) {
+	/**
+	 * places the selected card
+	 * @param sendCardPosition this is a callback that sends the data
+	 * @param chooseCard callback this tells the placedCard Component if a card has been placed
+	 */
+	placeCard(sendCardPosition, chooseCard): void {
 		if (!this.isTurn) return;
 
 		this.isPlacementValid = this.isValidPlacement(
@@ -615,12 +716,14 @@ class mapRenderer {
 		chooseCard();
 
 		this.setTurn(false);
+		this.selectedCard = -1;
 	}
 
+	/**
+	 * render's the currentMapstate
+	 */
 	render() {
-		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-		this.ctx.fillStyle = "#f25b50";
-		this.drawGrid();
+		this.checkSpecials();
 		this.drawHover();
 	}
 }

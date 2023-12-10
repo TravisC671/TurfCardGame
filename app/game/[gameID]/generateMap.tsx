@@ -17,7 +17,7 @@ export default function GenerateMap(props) {
 			let mainShadow = "#DE3F8F";
 			let mainColor = "#FF758F";
 			let mainHighlight = "#FF9F80";
-            //TODO put black box behin powercell and shrink it for border
+            //TODO make this actually generate with the map
 			if (i == 4 && j == 4) {
 				row.push(
 					<div
