@@ -49,6 +49,7 @@ class mapRenderer {
 	powerCellSVG: string;
 	emptyCellSVG: string;
 	hoverFilledCellSVG: string;
+	activatedPowerCellSVG: string;
 
 	changedHoverCells: number[][];
 	constructor() {
@@ -104,6 +105,11 @@ class mapRenderer {
 			.then((response) => response.text())
 			.then((svgContent) => {
 				this.hoverFilledCellSVG = svgContent;
+			});
+		fetch("/activated-power-cell.svg")
+			.then((response) => response.text())
+			.then((svgContent) => {
+				this.activatedPowerCellSVG = svgContent;
 			});
 	}
 
@@ -295,12 +301,12 @@ class mapRenderer {
 				if (j + x < 0 && isOutOfBoundsY) {
 					neighbors += 2;
 					isOutOfBoundsX = true;
-				} else if (j + x < 0) neighbors += 3
+				} else if (j + x < 0) neighbors += 3;
 
 				if (j + x >= this.mapWidth && isOutOfBoundsY) {
 					neighbors += 2;
 					isOutOfBoundsX = true;
-				} else if (j + x >= this.mapWidth) neighbors += 3
+				} else if (j + x >= this.mapWidth) neighbors += 3;
 
 				if ((j == 0 && i == 0) || isOutOfBoundsX || isOutOfBoundsY) {
 					continue;
@@ -316,16 +322,23 @@ class mapRenderer {
 
 	checkSpecials(): void {
 		for (let i = 0; i < this.mapArray.length; i++) {
-
 			for (let j = 0; j < this.mapArray[0].length; j++) {
-
 				let cellValue = this.mapArray[i][j];
 
 				if (cellValue == 3 || cellValue == 5) {
 					let neigbors = this.getNeighbors(i, j);
 					if (neigbors == 8) {
-						console.log('special spoted')
-						this.mapArray[i][j] = ( cellValue == 3 ) ? 7 : 8;
+						console.log("special spoted");
+						this.mapArray[i][j] = cellValue == 3 ? 7 : 8;
+						this.setCellElement(
+							j,
+							i,
+							this.activatedPowerCellSVG,
+							cellValue == 3 ? 1 : 0,
+							false,
+							false,
+							true,
+						);
 					}
 				}
 			}
@@ -367,6 +380,7 @@ class mapRenderer {
 						0,
 						true,
 						false,
+						false,
 					);
 					break;
 				case 3:
@@ -375,6 +389,7 @@ class mapRenderer {
 						pos[0],
 						this.powerCellSVG,
 						1,
+						false,
 						false,
 						false,
 					);
@@ -387,6 +402,7 @@ class mapRenderer {
 						1,
 						false,
 						false,
+						false,
 					);
 					break;
 				case 5:
@@ -397,6 +413,7 @@ class mapRenderer {
 						0,
 						false,
 						false,
+						false,
 					);
 					break;
 				case 6:
@@ -405,6 +422,7 @@ class mapRenderer {
 						pos[0],
 						this.filledCellSVG,
 						0,
+						false,
 						false,
 						false,
 					);
@@ -434,11 +452,11 @@ class mapRenderer {
 
 				hoverContainer.style.setProperty(
 					"--c",
-					( this.selectedCardArray[i][j] == 1 ) ? "#55bfe2" : "#4489e4",
+					this.selectedCardArray[i][j] == 1 ? "#55bfe2" : "#4489e4",
 				);
 				hoverContainer.style.setProperty(
 					"--o",
-					( this.isPlacementValid ) ? "0.8" : "0.4",
+					this.isPlacementValid ? "0.8" : "0.4",
 				);
 
 				hoverContainer.innerHTML = this.hoverFilledCellSVG;
@@ -560,7 +578,7 @@ class mapRenderer {
 		for (let r = 0; r < Math.abs(rotation); r++) {
 			cardArray = this.rotateArray(
 				cardArray,
-				( rotationDirection == -1 ) ? true : false,
+				rotationDirection == -1 ? true : false,
 			);
 		}
 
@@ -575,7 +593,7 @@ class mapRenderer {
 
 				if (cardArray[i][j] == 1) {
 					this.mapArray[i + positionY][j + positionX] =
-						( player == 0 ) ? 6 : 4;
+						player == 0 ? 6 : 4;
 
 					this.setCellElement(
 						j + positionX,
@@ -584,12 +602,13 @@ class mapRenderer {
 						player,
 						false,
 						true,
+						false,
 					);
 				}
 
 				if (cardArray[i][j] == 2) {
 					this.mapArray[i + positionY][j + positionX] =
-						( player == 0 ) ? 5 : 3;
+						player == 0 ? 5 : 3;
 
 					this.setCellElement(
 						j + positionX,
@@ -598,6 +617,7 @@ class mapRenderer {
 						player,
 						false,
 						true,
+						false,
 					);
 				}
 			}
@@ -612,6 +632,7 @@ class mapRenderer {
 	 * @param player which player placed the cell, either 0 or 1
 	 * @param clear clears all elements inside the cell if left true
 	 * @param placeAnim unused. true if you want to playe the place animation
+	 * @param isActivated used to see if you use the activated color or not
 	 */
 	setCellElement(
 		x: number,
@@ -620,18 +641,22 @@ class mapRenderer {
 		player: number,
 		clear: boolean,
 		placeAnim: boolean,
+		isActivated: boolean,
 	) {
 		let cellContainer = document.createElement("div");
 
-		let mainShadow = ( player == 0 ) ? "#4489E4" : "#de3f8f";
-		let mainColor = ( player == 0 ) ? "#55BFE2" : "#ff758f";
-		let mainHighlight = ( player == 0 ) ? "#8DF2F2" : "#ff9f80";
+		let mainShadow = player == 0 ? "#4489E4" : "#de3f8f";
+		let mainColor = player == 0 ? "#55BFE2" : "#ff758f";
+		let mainHighlight = player == 0 ? "#8DF2F2" : "#ff9f80";
 
-		let activatedShadow = ( player == 0 ) ? "#70A5EB" : "#EA81B5";
-		let activatedColor = ( player == 0 ) ? "#81CFEA" : "#FFA8B8";
-		let activatedHighlight = ( player == 0 ) ? "#BAF7F7" : "#FFBEA8";
+		let activatedShadow = player == 0 ? "#70A5EB" : "#EA81B5";
+		let activatedColor = player == 0 ? "#81CFEA" : "#FFA8B8";
+		let activatedHighlight = player == 0 ? "#BAF7F7" : "#FFBEA8";
 
 		let selectedCell = document.getElementById(`${y}-${x}`);
+		if (selectedCell == undefined) {
+			console.log(`cell of id "${y}-${x}" was not found`)
+		}
 		if (placeAnim) {
 			//cellContainer.classList.add(styles.place)
 		}
@@ -642,6 +667,11 @@ class mapRenderer {
 			selectedCell.style.setProperty("--m", mainColor);
 			selectedCell.style.setProperty("--s", mainShadow);
 			selectedCell.style.setProperty("--h", mainHighlight);
+			if (isActivated) {
+				selectedCell.style.setProperty("--activatedm", activatedColor);
+				selectedCell.style.setProperty("--activateds", activatedShadow);
+				selectedCell.style.setProperty("--activatedh", activatedHighlight);
+			}
 			//selectedCell.style.setProperty("--slamSize", placeAnim ? '1.5' : '1');
 			selectedCell.style.setProperty("viewBox", "0 0 100 100");
 			cellContainer.classList.add(styles.cellContent);
@@ -659,7 +689,7 @@ class mapRenderer {
 	 * @param cardID id of the card
 	 * @param rotation rotation of the card from the enemy pov
 	 * @param positionX x position from the enemy pov
-	 * @param positionY y position from the enempy pov
+	 * @param positionY y position from the enemy pov
 	 */
 	transformCard(cardID, rotation, positionX, positionY) {
 		let isMapEvenX = this.mapWidth % 2;

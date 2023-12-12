@@ -200,3 +200,64 @@
   grid-template-columns: repeat(var(--mapWidth), 44px);
   aspect-ratio: var(--mapWidth) / var(--mapHeight);
 }
+
+.uiButton {
+  height: 50px;
+  border-radius: 10px;
+  border: none;
+  background-color: #050505;
+  transition: .2s;
+  padding: 0px;
+}
+
+.uiButton:hover {
+  transform: scale(.97);
+}
+
+.uiButton:active {
+  transform: scale(.9);
+}
+
+.specialActive {
+  padding: 5px;
+  background: rgb(203,255,200);
+  background: linear-gradient(135deg, rgba(203,255,200,1) 0%, rgba(146,252,231,1) 50%, rgba(76,195,242,1) 100%);
+}
+
+.specialText {
+  border-radius: 6px;
+  height: 100%;
+  background-color: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passBtnWrapper {
+ position: relative;
+}
+
+.passStatus {
+  background-color: #101010;
+  height: 100%;
+  width: 0px;
+  transition: .01s;
+  position: relative;
+  top: 0;
+  right: 0;
+  border-radius: 10px;
+}
+
+.passText {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 25%;
+  left: 0;
+}
+
+.ActionButtonWrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 200px);
+  grid-gap: 30px 30px;
+}
