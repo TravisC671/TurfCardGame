@@ -11,47 +11,46 @@ import ActionButtons from "./ActionButtons";
 
 export default function AvailableCards(props) {
   const [cardHand, setCardHand] = useState([])
-  const [selectedCardPos, setSelectedCardPos] = useState([])
-  const [isSpecialActive, setSpecialStatus] = useState(false)
-  const [isPassBtnPressed, setPassBtnPressed] = useState(false)
+  const [selectedCardPos, setSelectedCardPos] = useState(-1)
 
   const passStatus = useRef(null)
 	const card = useSelector(selectCardState);
 
   useEffect(() => {
-    socket.on('dealHand', (data) => {
+    console.log(cardHand)
+
+
+    const dealHand = (data) => {
       setCardHand(data.cards)
       console.log(data.cards)
-    })
-
-    while(isPassBtnPressed) {
-      console.log('pressed')
     }
 
-    return
-  }, [])
+    const sendNewCard = (data) => {
+      console.log('dealHand',data)
+      let newCardHand = cardHand
+      console.log(newCardHand)
+      if (selectedCardPos != -1) {
+        newCardHand[selectedCardPos] = data
+        console.log(newCardHand)
+        setCardHand(newCardHand)
+      }
+    }
+
+
+    socket.on('dealHand', dealHand)
+    socket.on('sendNewCard', sendNewCard)
+    
+    return () => {
+      socket.off('dealHand', dealHand)
+      socket.off('sendNewCard', sendNewCard)
+    }
+  }, [cardHand])
   
   const dispatch = useDispatch();
 
   const selectCard = (id) => {
     dispatch(setSelectedCard(cardHand[id]))
     setSelectedCardPos(id)
-  }
-
-  const specialButtonClick = () => {
-    setSpecialStatus(!isSpecialActive)
-  }
-
-  const passStatusClickDown = () => {
-    setPassBtnPressed(true)
-    console.log('pressed')
-
-  }
-
-  const passStatusClickUp = () => {
-    console.log('mouseUp')
-
-    setPassBtnPressed(false)
   }
 
   return (

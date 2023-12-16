@@ -59,7 +59,7 @@ export default function Card(props) {
 	const cardStyle = () => ({
 		border: (props.selectedCard == props.id) ? '5px solid #fff' : 'none'
 	})
-
+	
 	const click = (e) => {
 		if (props.cardHand.length >= 4) {
 			props.selectCard(props.id)

@@ -427,6 +427,28 @@ class mapRenderer {
 						false,
 					);
 					break;
+				case 7:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.activatedPowerCellSVG,
+						1,
+						false,
+						false,
+						true,
+					);
+					break;
+				case 8:
+					this.setCellElement(
+						pos[1],
+						pos[0],
+						this.activatedPowerCellSVG,
+						0,
+						false,
+						false,
+						true,
+					);
+					break;
 			}
 		}
 		this.changedHoverCells = [];
@@ -655,7 +677,7 @@ class mapRenderer {
 
 		let selectedCell = document.getElementById(`${y}-${x}`);
 		if (selectedCell == undefined) {
-			console.log(`cell of id "${y}-${x}" was not found`)
+			console.log(`cell of id "${y}-${x}" was not found`);
 		}
 		if (placeAnim) {
 			//cellContainer.classList.add(styles.place)
@@ -670,7 +692,10 @@ class mapRenderer {
 			if (isActivated) {
 				selectedCell.style.setProperty("--activatedm", activatedColor);
 				selectedCell.style.setProperty("--activateds", activatedShadow);
-				selectedCell.style.setProperty("--activatedh", activatedHighlight);
+				selectedCell.style.setProperty(
+					"--activatedh",
+					activatedHighlight,
+				);
 			}
 			//selectedCell.style.setProperty("--slamSize", placeAnim ? '1.5' : '1');
 			selectedCell.style.setProperty("viewBox", "0 0 100 100");
